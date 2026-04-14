@@ -1,0 +1,112 @@
+.wrapper {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.messages {
+  min-height: 120px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.placeholder {
+  color: #475569;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.userMsg,
+.aiMsg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.userMsg {
+  background: #0f4c81;
+  align-self: flex-end;
+  max-width: 80%;
+  color: #e0f2fe;
+}
+
+.aiMsg {
+  background: #0f172a;
+  align-self: flex-start;
+  max-width: 90%;
+  color: #cbd5e1;
+}
+
+.roleLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.thinking {
+  color: #475569;
+  font-style: italic;
+}
+
+.form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input {
+  flex: 1;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #38bdf8;
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.btn {
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #0369a1;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
