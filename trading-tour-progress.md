@@ -9,4 +9,4 @@ started: 2026-04-14
 - [x] Fair Value Gaps
 - [x] Entry Logic
 - [x] Risk Management
-- [ ] Checkpointing
+- [x] Checkpointing
