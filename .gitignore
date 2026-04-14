@@ -46,3 +46,10 @@
 # Node.js dependencies
 node_modules/
 
+# Python
+__pycache__/
+*.pyc
+
+# Frontend build output
+client/dist/
+
