@@ -7,6 +7,6 @@ started: 2026-04-14
 - [x] Market Structure
 - [x] Order Blocks
 - [x] Fair Value Gaps
-- [ ] Entry Logic
+- [x] Entry Logic
 - [ ] Risk Management
 - [ ] Checkpointing
