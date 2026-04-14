@@ -5,7 +5,7 @@ started: 2026-04-14
 ## Stops
 
 - [x] Market Structure
-- [ ] Order Blocks
+- [x] Order Blocks
 - [ ] Fair Value Gaps
 - [ ] Entry Logic
 - [ ] Risk Management
