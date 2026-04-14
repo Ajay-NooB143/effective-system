@@ -19,6 +19,16 @@ def _git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], capture_output=True, text=True)
 
 
+def _git_checked(*args: str, action: str = "git operation") -> bool:
+    """Run a git command and return True on success, printing a warning otherwise."""
+    result = _git(*args)
+    if result.returncode != 0:
+        msg = (result.stderr or result.stdout).strip()
+        print(f"⚠️  {action} failed: {msg or 'unknown error'}")
+        return False
+    return True
+
+
 def _branch_exists(branch: str) -> bool:
     result = _git("branch", "--list", branch)
     return branch in result.stdout
@@ -87,8 +97,13 @@ def mark_stop_done(stop_name: str) -> None:
     data = _read_progress()
     data["stops"][stop_name] = "done"
     _write_progress(data)
-    _git("add", str(PROGRESS_FILE))
-    _git("commit", "-m", f"trading-tour: complete {stop_name}")
+    _git_checked("add", str(PROGRESS_FILE), action="git add")
+    # It is normal for nothing to commit if the file was already up-to-date.
+    result = _git("commit", "-m", f"trading-tour: complete {stop_name}")
+    if result.returncode != 0:
+        msg = (result.stderr or result.stdout).strip()
+        if "nothing to commit" not in msg:
+            print(f"⚠️  git commit failed: {msg or 'unknown error'}")
 
 
 def finish_tour() -> None:
@@ -96,8 +111,12 @@ def finish_tour() -> None:
     data = _read_progress()
     data["completed"] = str(date.today())
     _write_progress(data)
-    _git("add", str(PROGRESS_FILE))
-    _git("commit", "-m", "trading-tour: complete")
+    _git_checked("add", str(PROGRESS_FILE), action="git add")
+    result = _git("commit", "-m", "trading-tour: complete")
+    if result.returncode != 0:
+        msg = (result.stderr or result.stdout).strip()
+        if "nothing to commit" not in msg:
+            print(f"⚠️  git commit failed: {msg or 'unknown error'}")
 
 
 def get_stops_status() -> dict[str, str]:

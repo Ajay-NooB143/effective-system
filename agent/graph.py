@@ -85,7 +85,14 @@ def transition(ctx: TourContext, event: str, payload: str = "") -> TourContext:
         ctx.state = State.COMPLETE
 
     elif event == "reset":
-        ctx.__init__()  # type: ignore[misc]
+        # Replace all fields with fresh defaults rather than calling __init__ directly.
+        fresh = TourContext()
+        ctx.state = fresh.state
+        ctx.survey_answers = fresh.survey_answers
+        ctx.survey_step = fresh.survey_step
+        ctx.stops = fresh.stops
+        ctx.current_stop_index = fresh.current_stop_index
+        ctx.user_level = fresh.user_level
 
     return ctx
 

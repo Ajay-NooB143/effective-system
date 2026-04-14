@@ -269,7 +269,13 @@ def run_tour(read_line=None, write=None) -> None:
 
     for q in SURVEY_QUESTIONS:
         write(q)
-        answer = read_line().strip() or "no answer"
+        answer = ""
+        while not answer:
+            answer = read_line().strip()
+            if not answer:
+                write("  (Please type an answer, or type 'skip' to continue.)")
+        if answer.lower() == "skip":
+            answer = "no answer"
         transition(ctx, "survey_answer", answer)
 
     transition(ctx, "survey_done")
