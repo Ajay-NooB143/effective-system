@@ -130,18 +130,18 @@ STOP_CATALOGUE: list[dict] = [
         "title": "Stop 5 · Risk Management",
         "levels": "all",
         "content": (
-            "Risk per trade is typically 0.5–2 % of account equity. "
-            "Position size = (Account × Risk %) / (Entry − Stop). "
+            "Risk per trade is typically 0.5–2% of account equity. "
+            "Position size = (Account × Risk%) / (Entry − Stop). "
             "Minimum reward:risk target is usually 1:2 or better."
         ),
         "demo_prompt": (
-            "Account: $10 000, Risk: 1 %, Entry: 1.2000, Stop: 1.1950. "
+            "Account: $10,000, Risk: 1%, Entry: 1.2000, Stop: 1.1950. "
             "What is your position size in units? (or 'skip')"
         ),
         "fact_labels": [
             ("Position sizing formula: (Account × Risk%) / (Entry − Stop).",
              "Per trading theory"),
-            ("The 1–2 % rule is a common guideline, not a guarantee of success.",
+            ("The 1–2% rule is a common guideline, not a guarantee of success.",
              "Uncertain — verify before trading with real capital"),
         ],
     },
