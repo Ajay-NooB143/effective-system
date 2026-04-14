@@ -8,5 +8,5 @@ started: 2026-04-14
 - [x] Order Blocks
 - [x] Fair Value Gaps
 - [x] Entry Logic
-- [ ] Risk Management
+- [x] Risk Management
 - [ ] Checkpointing
