@@ -39,3 +39,10 @@
 
 # debug information files
 *.dwo
+
+# Environment variables — never commit secrets
+.env
+
+# Node.js dependencies
+node_modules/
+
