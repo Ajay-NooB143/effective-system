@@ -14,6 +14,9 @@ def webhook():
     symbol = data.get("symbol", "BTCUSDT")
     price  = float(data.get("price", 0))
 
+    if price <= 0:
+        return "INVALID PRICE", 400
+
     # 1. Risk check FIRST
     allowed, reason = risk.can_trade()
     if not allowed:

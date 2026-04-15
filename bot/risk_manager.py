@@ -21,6 +21,9 @@ class RiskManager:
     def can_trade(self):
         self.reset_daily()
 
+        if self.start_balance <= 0:
+            return False, "❌ Invalid start balance"
+
         daily_loss = ((self.current_balance - self.start_balance) / self.start_balance) * 100
 
         if daily_loss < -self.max_daily_loss:
@@ -32,6 +35,8 @@ class RiskManager:
         return True, "✅ Allowed"
 
     def position_size(self, price):
+        if price <= 0:
+            raise ValueError("Price must be greater than 0")
         risk_amount = self.current_balance * self.risk_per_trade
         qty = risk_amount / price
         return round(qty, 5)
