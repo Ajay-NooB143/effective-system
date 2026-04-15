@@ -10,6 +10,10 @@ on:
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   python-security:
     name: Python Security Scan

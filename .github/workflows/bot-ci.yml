@@ -12,6 +12,9 @@ on:
       - 'bot/**'
       - '.github/workflows/bot-ci.yml'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

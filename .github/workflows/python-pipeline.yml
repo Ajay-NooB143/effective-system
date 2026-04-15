@@ -12,6 +12,9 @@ on:
       - 'python/**'
       - '.github/workflows/python-pipeline.yml'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
