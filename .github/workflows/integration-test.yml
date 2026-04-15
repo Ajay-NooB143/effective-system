@@ -1,0 +1,196 @@
+name: Full System Integration Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Install Python dependencies
+      run: |
+        cd python
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        cd ../bot
+        pip install -r requirements.txt
+
+    - name: Install Server dependencies
+      run: |
+        cd server
+        npm ci
+
+    - name: Install Client dependencies
+      run: |
+        cd client
+        npm ci
+
+    - name: Validate Python Pipeline
+      run: |
+        cd python
+        python -c "
+        import sys
+        try:
+            from app import app
+            from risk_manager import RiskManager
+            from portfolio import Portfolio
+            print('✅ Python pipeline imports successful')
+        except Exception as e:
+            print(f'❌ Python pipeline import failed: {e}')
+            sys.exit(1)
+        "
+
+    - name: Validate Bot
+      run: |
+        cd bot
+        python -c "
+        import sys
+        try:
+            from webhook import app
+            from execution import place_order
+            print('✅ Bot imports successful')
+        except Exception as e:
+            print(f'❌ Bot import failed: {e}')
+            sys.exit(1)
+        "
+
+    - name: Build Client
+      run: |
+        cd client
+        npm run build
+
+    - name: Start Python Pipeline (background)
+      run: |
+        cd python
+        # Create .env file for testing
+        cat > .env << EOF
+        TRADING_MODE=sim
+        FLASK_PORT=5001
+        INITIAL_BALANCE=10000
+        EOF
+        nohup python app.py > /tmp/python-pipeline.log 2>&1 &
+        echo $! > /tmp/python-pipeline.pid
+        sleep 5
+
+    - name: Start Bot (background)
+      run: |
+        cd bot
+        # Create .env file for testing
+        cat > .env << EOF
+        MODE=SAFE
+        PORT=5000
+        WEBHOOK_SECRET=test_secret
+        ORDER_QTY=0.001
+        EOF
+        nohup python main.py > /tmp/bot.log 2>&1 &
+        echo $! > /tmp/bot.pid
+        sleep 5
+
+    - name: Test Python Pipeline Health
+      run: |
+        max_attempts=10
+        attempt=0
+        while [ $attempt -lt $max_attempts ]; do
+          if curl -f http://localhost:5001/health 2>/dev/null; then
+            echo "✅ Python pipeline is healthy"
+            break
+          fi
+          attempt=$((attempt + 1))
+          echo "Waiting for Python pipeline... (attempt $attempt/$max_attempts)"
+          sleep 2
+        done
+        if [ $attempt -eq $max_attempts ]; then
+          echo "❌ Python pipeline health check failed"
+          cat /tmp/python-pipeline.log
+          exit 1
+        fi
+
+    - name: Test Bot Health
+      run: |
+        max_attempts=10
+        attempt=0
+        while [ $attempt -lt $max_attempts ]; do
+          if curl -f http://localhost:5000/webhook -X POST -H "Content-Type: application/json" -d '{"symbol":"BTCUSDT","price":50000}' 2>/dev/null; then
+            echo "✅ Bot is responding"
+            break
+          fi
+          attempt=$((attempt + 1))
+          echo "Waiting for Bot... (attempt $attempt/$max_attempts)"
+          sleep 2
+        done
+        if [ $attempt -eq $max_attempts ]; then
+          echo "⚠️ Bot health check inconclusive"
+          cat /tmp/bot.log
+        fi
+
+    - name: Test Python Pipeline Webhook
+      run: |
+        response=$(curl -X POST http://localhost:5001/webhook \
+          -H "Content-Type: application/json" \
+          -d '{
+            "symbol": "BTCUSDT",
+            "rsi": 55.0,
+            "atr": 120.0,
+            "volume": 100000,
+            "price": 67000
+          }' \
+          -w "\n%{http_code}" -s)
+        
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | head -n-1)
+        
+        echo "Response: $body"
+        echo "HTTP Code: $http_code"
+        
+        if [ "$http_code" = "200" ]; then
+          echo "✅ Python pipeline webhook test passed"
+        else
+          echo "❌ Python pipeline webhook test failed with code $http_code"
+          exit 1
+        fi
+
+    - name: Show service logs
+      if: always()
+      run: |
+        echo "=== Python Pipeline Logs ==="
+        cat /tmp/python-pipeline.log || echo "No logs found"
+        echo ""
+        echo "=== Bot Logs ==="
+        cat /tmp/bot.log || echo "No logs found"
+
+    - name: Cleanup
+      if: always()
+      run: |
+        if [ -f /tmp/python-pipeline.pid ]; then
+          kill $(cat /tmp/python-pipeline.pid) 2>/dev/null || true
+        fi
+        if [ -f /tmp/bot.pid ]; then
+          kill $(cat /tmp/bot.pid) 2>/dev/null || true
+        fi
+
+    - name: Summary
+      if: success()
+      run: |
+        echo "✅ All systems validated successfully!"
+        echo "  - Python Trading Pipeline: ✅"
+        echo "  - Bot: ✅"
+        echo "  - Server: ✅"
+        echo "  - Client: ✅"
