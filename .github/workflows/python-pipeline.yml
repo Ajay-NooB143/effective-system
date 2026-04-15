@@ -55,7 +55,7 @@ jobs:
       continue-on-error: true
       run: |
         cd python
-        pylint --disable=all --enable=C,E,F,R --max-line-length=127 *.py || true
+        pylint --disable=all --enable=C,E,F,R --max-line-length=127 **/*.py *.py || true
 
     - name: Run tests
       run: |
