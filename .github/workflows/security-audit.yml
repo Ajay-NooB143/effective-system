@@ -1,0 +1,120 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  python-security:
+    name: Python Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install security tools
+      run: |
+        pip install bandit safety pip-audit
+
+    - name: Run Bandit on Python Pipeline
+      continue-on-error: true
+      run: |
+        cd python
+        echo "=== Python Trading Pipeline Security Scan ==="
+        bandit -r . -f json -o ../bandit-python.json
+        bandit -r . || true
+
+    - name: Run Bandit on Bot
+      continue-on-error: true
+      run: |
+        cd bot
+        echo "=== Bot Security Scan ==="
+        bandit -r . -f json -o ../bandit-bot.json
+        bandit -r . || true
+
+    - name: Check dependencies for known vulnerabilities (Python)
+      continue-on-error: true
+      run: |
+        cd python
+        echo "=== Python Pipeline Dependency Scan ==="
+        pip install -r requirements.txt
+        pip-audit || true
+        safety check || true
+
+    - name: Check dependencies for known vulnerabilities (Bot)
+      continue-on-error: true
+      run: |
+        cd bot
+        echo "=== Bot Dependency Scan ==="
+        pip install -r requirements.txt
+        pip-audit || true
+        safety check || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports-python
+        path: |
+          bandit-*.json
+
+  node-security:
+    name: Node.js Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Audit Server dependencies
+      run: |
+        cd server
+        echo "=== Server Security Audit ==="
+        npm ci
+        npm audit --json > ../server-audit.json || true
+        npm audit || true
+
+    - name: Audit Client dependencies
+      run: |
+        cd client
+        echo "=== Client Security Audit ==="
+        npm ci
+        npm audit --json > ../client-audit.json || true
+        npm audit || true
+
+    - name: Upload audit reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports-node
+        path: |
+          *-audit.json
+
+  summary:
+    name: Security Summary
+    needs: [python-security, node-security]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - name: Security check summary
+      run: |
+        echo "🔒 Security audit completed for all systems"
+        echo "  - Python Trading Pipeline: ${{ needs.python-security.result }}"
+        echo "  - Node.js Services: ${{ needs.node-security.result }}"
+        echo ""
+        echo "⚠️  Review the security reports in the artifacts for any critical issues"
