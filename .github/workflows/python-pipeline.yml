@@ -55,7 +55,8 @@ jobs:
       continue-on-error: true
       run: |
         cd python
-        pylint --disable=all --enable=C,E,F,R --max-line-length=127 **/*.py *.py || true
+        # Use pylint's recursive option to scan all Python files
+        pylint --disable=all --enable=C,E,F,R --max-line-length=127 --recursive=y . || true
 
     - name: Run tests
       run: |

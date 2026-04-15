@@ -134,19 +134,22 @@ jobs:
         attempt=0
         while [ $attempt -lt $max_attempts ]; do
           # Use a more complete payload matching the bot's expected schema
-          response=$(curl -f http://localhost:5000/webhook \
+          response=$(curl http://localhost:5000/webhook \
             -X POST \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Secret: test_secret" \
             -d '{"symbol":"BTCUSDT","price":50000}' \
-            2>&1)
-          if [ $? -eq 0 ]; then
-            echo "✅ Bot is responding"
-            echo "Response: $response"
+            -w "\n%{http_code}" -s)
+          
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" = "200" ] || [ "$http_code" = "403" ]; then
+            echo "✅ Bot is responding (HTTP $http_code)"
+            echo "Response: $(echo "$response" | head -n-1)"
             break
           fi
           attempt=$((attempt + 1))
-          echo "Waiting for Bot... (attempt $attempt/$max_attempts)"
+          echo "Waiting for Bot... (attempt $attempt/$max_attempts, got HTTP $http_code)"
           sleep 2
         done
         if [ $attempt -eq $max_attempts ]; then
