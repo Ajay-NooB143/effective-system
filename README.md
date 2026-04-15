@@ -49,3 +49,13 @@ The UI runs on `http://localhost:5173`.
 - Only enable **Read** permissions on your Binance API key
 - Never share your API keys
 - Never commit your `.env` file to git
+
+---
+
+## 🛡️ Risk Management
+The bot automatically manages risk:
+- ❌ Stops trading if daily loss > 5%
+- 📦 Auto-calculates position size (2% risk per trade)
+- 🔢 Max 5 trades per day
+- 🔄 Resets daily counters at midnight
+- 📱 Sends Telegram alert when trade is blocked
