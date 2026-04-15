@@ -105,6 +105,14 @@ def orderbook_update():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     """Main TradingView alert handler."""
+    try:
+        return _process_webhook()
+    except Exception as exc:
+        logger.exception("Unhandled error in /webhook")
+        return jsonify({"error": "internal server error"}), 500
+
+
+def _process_webhook():
     data = request.get_json(force=True) or {}
 
     symbol = str(data.get("symbol", "")).upper()
@@ -140,7 +148,7 @@ def webhook():
     # Risk gate
     # -----------------------------------------------------------------
     portfolio_value = portfolio.balance
-    proposed_size = portfolio_value * 0.10  # 10 % notional per alert
+    proposed_size = portfolio_value * float(os.getenv("ALERT_POSITION_PCT", "0.10"))
     current_drawdown = float(data.get("drawdown", 0))
 
     if not risk_manager.can_trade(symbol, proposed_size, portfolio_value, current_drawdown):

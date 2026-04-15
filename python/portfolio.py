@@ -54,8 +54,6 @@ class Portfolio:
             return {s: 0.0 for s in self.symbols}
 
         weight_per_symbol = max(MIN_WEIGHT, 1.0 / n_active)
-        # Cap total allocation at 1.0 (100 % of balance)
-        weight_per_symbol = min(weight_per_symbol, 1.0 / n_active)
 
         allocations: Dict[str, float] = {}
         for symbol in self.symbols:
