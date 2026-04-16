@@ -21,17 +21,18 @@ except ValueError:
         f"Invalid value for ORDER_QTY: '{ORDER_QTY_STR}'. Must be a positive number (e.g. 0.001)."
     )
 
-_REQUIRED = {
-    "BINANCE_API_KEY": BINANCE_API_KEY,
-    "BINANCE_SECRET": BINANCE_SECRET,
-    "TELEGRAM_TOKEN": TELEGRAM_TOKEN,
-    "CHAT_ID": CHAT_ID,
-}
-
-_missing = [k for k, v in _REQUIRED.items() if not v]
-if _missing:
-    raise EnvironmentError(
-        f"Missing required environment variables: {', '.join(_missing)}. "
-        "Copy .env.example to .env and fill in your values."
-    )
+def validate_config():
+    """Raise EnvironmentError if any required variables are missing."""
+    _REQUIRED = {
+        "BINANCE_API_KEY": BINANCE_API_KEY,
+        "BINANCE_SECRET": BINANCE_SECRET,
+        "TELEGRAM_TOKEN": TELEGRAM_TOKEN,
+        "CHAT_ID": CHAT_ID,
+    }
+    _missing = [k for k, v in _REQUIRED.items() if not v]
+    if _missing:
+        raise EnvironmentError(
+            f"Missing required environment variables: {', '.join(_missing)}. "
+            "Copy .env.example to .env and fill in your values."
+        )
 
