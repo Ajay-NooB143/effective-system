@@ -1,11 +1,4 @@
-from config import (
-    MODE,
-    TELEGRAM_TOKEN,
-    CHAT_ID,
-    BINANCE_API_KEY,
-    BINANCE_SECRET,
-    validate_config,
-)
+from config import validate_config
 from telegram_bot import send_telegram
 from webhook import app
 

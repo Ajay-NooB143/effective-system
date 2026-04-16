@@ -14,7 +14,6 @@ import numpy as np
 
 try:
     from stable_baselines3 import PPO  # type: ignore
-    from stable_baselines3.common.env_util import make_vec_env  # type: ignore
     SB3_AVAILABLE = True
 except ImportError:
     SB3_AVAILABLE = False

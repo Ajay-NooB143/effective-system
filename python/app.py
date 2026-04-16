@@ -107,7 +107,7 @@ def webhook():
     """Main TradingView alert handler."""
     try:
         return _process_webhook()
-    except Exception as exc:
+    except Exception:
         logger.exception("Unhandled error in /webhook")
         return jsonify({"error": "internal server error"}), 500
 
