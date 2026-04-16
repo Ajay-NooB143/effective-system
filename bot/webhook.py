@@ -6,7 +6,8 @@ from config import WEBHOOK_SECRET, ORDER_QTY
 
 app = Flask(__name__)
 
-@app.route('/webhook', methods=['POST'])
+
+@app.route("/webhook", methods=["POST"])
 def webhook():
     # Validate shared secret if configured
     if WEBHOOK_SECRET:
@@ -49,6 +50,7 @@ def webhook():
 """)
 
     return "OK", 200
+
 
 if __name__ == "__main__":
     app.run(port=5000)

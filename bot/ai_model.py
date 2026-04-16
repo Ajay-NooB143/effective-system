@@ -2,7 +2,18 @@ import os
 import random
 from openai import OpenAI
 
-client_ai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_client_ai = None
+
+
+def _get_client():
+    global _client_ai
+    if _client_ai is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        _client_ai = OpenAI(api_key=api_key)
+    return _client_ai
+
 
 def ai_predict(features):
     """
@@ -22,11 +33,12 @@ Example:
 BUY
 0.82
 """
+        client_ai = _get_client()
         response = client_ai.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=20,
-            temperature=0.3
+            temperature=0.3,
         )
         text = response.choices[0].message.content.strip().split("\n")
         signal = text[0].strip().upper()

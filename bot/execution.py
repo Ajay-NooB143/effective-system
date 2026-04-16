@@ -2,7 +2,15 @@ from binance.client import Client
 from config import BINANCE_API_KEY, BINANCE_SECRET, MODE
 from telegram_bot import send_telegram
 
-client = Client(BINANCE_API_KEY, BINANCE_SECRET)
+_client = None
+
+
+def _get_client():
+    global _client
+    if _client is None:
+        _client = Client(BINANCE_API_KEY, BINANCE_SECRET)
+    return _client
+
 
 def place_order(symbol, side, qty):
     if MODE == "SAFE":
@@ -10,11 +18,9 @@ def place_order(symbol, side, qty):
         send_telegram(f"🟡 SIM {side} {symbol} qty={qty}")
     else:
         try:
+            client = _get_client()
             order = client.create_order(
-                symbol=symbol,
-                side=side,
-                type="MARKET",
-                quantity=qty
+                symbol=symbol, side=side, type="MARKET", quantity=qty
             )
             send_telegram(f"✅ LIVE ORDER PLACED\n{side} {symbol}\nQty: {qty}")
             return order
