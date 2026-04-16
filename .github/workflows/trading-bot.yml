@@ -36,7 +36,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r bot/requirements.txt
 
+      - name: Check required secrets
+        id: check_secrets
+        run: |
+          if [[ -n "$BINANCE_API_KEY" && -n "$BINANCE_SECRET" && -n "$TELEGRAM_TOKEN" && -n "$CHAT_ID" ]]; then
+            echo "secrets_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_available=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Required trading secrets (BINANCE_API_KEY, BINANCE_SECRET, TELEGRAM_TOKEN, CHAT_ID) are not configured. Skipping bot execution."
+          fi
+
       - name: Run trading bot
+        if: steps.check_secrets.outputs.secrets_available == 'true'
         run: |
           python bot/main.py
 
