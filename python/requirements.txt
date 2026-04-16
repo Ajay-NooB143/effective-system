@@ -24,3 +24,6 @@ python-binance>=1.0.19
 
 # Environment variable loading
 python-dotenv>=1.0.0
+
+# AI trading agent
+vibe-trading-ai>=0.1.4
