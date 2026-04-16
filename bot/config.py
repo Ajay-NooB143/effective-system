@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
-BINANCE_SECRET  = os.getenv("BINANCE_SECRET")
+BINANCE_SECRET = os.getenv("BINANCE_SECRET")
 
-TELEGRAM_TOKEN  = os.getenv("TELEGRAM_TOKEN")
-CHAT_ID         = os.getenv("CHAT_ID")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 MODE = os.getenv("MODE", "SAFE")  # SAFE = simulation, LIVE = real orders
 
@@ -20,6 +20,7 @@ except ValueError:
     raise EnvironmentError(
         f"Invalid value for ORDER_QTY: '{ORDER_QTY_STR}'. Must be a positive number (e.g. 0.001)."
     )
+
 
 def validate_config():
     """Raise EnvironmentError if any required variables are missing."""
@@ -35,4 +36,3 @@ def validate_config():
             f"Missing required environment variables: {', '.join(_missing)}. "
             "Copy .env.example to .env and fill in your values."
         )
-
