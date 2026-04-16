@@ -2,8 +2,6 @@ import os
 import random
 from openai import OpenAI
 
-client_ai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def ai_predict(features):
     """
     Uses GPT-4 to predict BUY/SELL/HOLD.
@@ -12,6 +10,10 @@ def ai_predict(features):
     Returns: (signal, confidence)
     """
     try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY not set")
+        client_ai = OpenAI(api_key=api_key)
         price = features[0] if features else 0
         prompt = f"""You are a professional trading AI.
 Current price: {price}
