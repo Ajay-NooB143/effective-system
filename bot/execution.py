@@ -4,6 +4,7 @@ from telegram_bot import send_telegram
 
 client = Client(BINANCE_API_KEY, BINANCE_SECRET)
 
+
 def place_order(symbol, side, qty):
     if MODE == "SAFE":
         print(f"[SIM] {side} {symbol} {qty}")
@@ -11,10 +12,7 @@ def place_order(symbol, side, qty):
     else:
         try:
             order = client.create_order(
-                symbol=symbol,
-                side=side,
-                type="MARKET",
-                quantity=qty
+                symbol=symbol, side=side, type="MARKET", quantity=qty
             )
             send_telegram(f"✅ LIVE ORDER PLACED\n{side} {symbol}\nQty: {qty}")
             return order

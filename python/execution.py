@@ -14,6 +14,7 @@ TRADING_MODE = os.getenv("TRADING_MODE", "sim").lower()
 
 try:
     from binance.client import Client as BinanceClient  # type: ignore
+
     BINANCE_AVAILABLE = True
 except ImportError:
     BINANCE_AVAILABLE = False
@@ -26,8 +27,7 @@ def _get_binance_client():
     if _binance_client is None:
         if not BINANCE_AVAILABLE:
             raise ImportError(
-                "python-binance is not installed. "
-                "Run: pip install python-binance"
+                "python-binance is not installed. " "Run: pip install python-binance"
             )
         api_key = os.getenv("BINANCE_API_KEY", "")
         api_secret = os.getenv("BINANCE_SECRET_KEY", "")
@@ -76,6 +76,7 @@ def execute_multi(allocations: Dict[str, float], prices: Dict[str, float]) -> li
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _execute_sim(symbol: str, side: str, quantity: float, price: float) -> dict:
     """Return a simulated order result."""

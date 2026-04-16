@@ -79,6 +79,7 @@ for _loader, _path_env, _default in [
 # Routes
 # ---------------------------------------------------------------------------
 
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -151,8 +152,13 @@ def _process_webhook():
     proposed_size = portfolio_value * float(os.getenv("ALERT_POSITION_PCT", "0.10"))
     current_drawdown = float(data.get("drawdown", 0))
 
-    if not risk_manager.can_trade(symbol, proposed_size, portfolio_value, current_drawdown):
-        return jsonify({"status": "blocked", "symbol": symbol, "reason": "risk limit"}), 200
+    if not risk_manager.can_trade(
+        symbol, proposed_size, portfolio_value, current_drawdown
+    ):
+        return (
+            jsonify({"status": "blocked", "symbol": symbol, "reason": "risk limit"}),
+            200,
+        )
 
     # -----------------------------------------------------------------
     # Model ensemble

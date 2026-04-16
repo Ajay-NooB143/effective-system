@@ -15,6 +15,7 @@ import numpy as np
 try:
     from stable_baselines3 import PPO  # type: ignore
     from stable_baselines3.common.env_util import make_vec_env  # type: ignore
+
     SB3_AVAILABLE = True
 except ImportError:
     SB3_AVAILABLE = False
@@ -25,11 +26,11 @@ QTABLE_PATH = os.getenv("QTABLE_PATH", "models/qtable.pkl")
 PPO_PATH = os.getenv("PPO_MODEL_PATH", "models/ppo_model")
 
 # Q-Table hyper-parameters
-N_ACTIONS = 3       # 0=short, 1=flat, 2=long
-N_BINS = 10         # bins per feature dimension
-N_FEATURES = 7      # must match TradingEnv observation space
-ALPHA = 0.1         # learning rate
-GAMMA = 0.99        # discount factor
+N_ACTIONS = 3  # 0=short, 1=flat, 2=long
+N_BINS = 10  # bins per feature dimension
+N_FEATURES = 7  # must match TradingEnv observation space
+ALPHA = 0.1  # learning rate
+GAMMA = 0.99  # discount factor
 EPSILON_INIT = 0.3  # ε-greedy exploration (decays over time)
 
 
@@ -135,7 +136,9 @@ class RLAgent:
 
         return 0  # flat when nothing is loaded
 
-    def update(self, features: dict, action: int, reward: float, next_features: dict) -> None:
+    def update(
+        self, features: dict, action: int, reward: float, next_features: dict
+    ) -> None:
         """Online Q-Table update from a completed step (reward feedback loop)."""
         if self._qtable is None:
             return
@@ -158,6 +161,7 @@ class RLAgent:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _features_to_obs(features: dict) -> np.ndarray:
     return np.array(
         [
@@ -176,13 +180,13 @@ def _features_to_obs(features: dict) -> np.ndarray:
 def _default_bins() -> list:
     """Return per-feature bin edges used to discretise the observation space."""
     return [
-        np.linspace(0, 100, N_BINS + 1),      # rsi
-        np.linspace(0, 1000, N_BINS + 1),     # atr
-        np.linspace(0, 1e9, N_BINS + 1),      # volume
-        np.linspace(0, 1e6, N_BINS + 1),      # price
-        np.linspace(0, 100, N_BINS + 1),      # spread
-        np.linspace(-1, 1, N_BINS + 1),       # imbalance
-        np.linspace(-1, 1, N_BINS + 1),       # position
+        np.linspace(0, 100, N_BINS + 1),  # rsi
+        np.linspace(0, 1000, N_BINS + 1),  # atr
+        np.linspace(0, 1e9, N_BINS + 1),  # volume
+        np.linspace(0, 1e6, N_BINS + 1),  # price
+        np.linspace(0, 100, N_BINS + 1),  # spread
+        np.linspace(-1, 1, N_BINS + 1),  # imbalance
+        np.linspace(-1, 1, N_BINS + 1),  # position
     ]
 
 

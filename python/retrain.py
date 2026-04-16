@@ -111,9 +111,7 @@ def retrain_all(data: list = None) -> None:
 
 def _schedule_loop() -> None:
     if schedule is None:
-        raise ImportError(
-            "schedule is not installed. Run: pip install schedule"
-        )
+        raise ImportError("schedule is not installed. Run: pip install schedule")
 
     schedule.every(RETRAIN_INTERVAL_DAYS).days.do(retrain_all)
     logger.info(

@@ -22,7 +22,7 @@ D_MODEL = int(os.getenv("TRANSFORMER_D_MODEL", "32"))
 N_HEADS = int(os.getenv("TRANSFORMER_N_HEADS", "4"))
 N_LAYERS = int(os.getenv("TRANSFORMER_N_LAYERS", "2"))
 N_FEATURES = 6  # rsi, atr, volume, price, spread, imbalance
-N_CLASSES = 3   # short(-1), flat(0), long(1)
+N_CLASSES = 3  # short(-1), flat(0), long(1)
 SIGNAL_THRESHOLD = float(os.getenv("TRANSFORMER_THRESHOLD", "0.5"))
 
 
@@ -124,6 +124,7 @@ class TransformerModel:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _row_to_vec(d: dict) -> list:
     return [

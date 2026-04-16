@@ -8,9 +8,7 @@ from typing import Dict
 
 SUPPORTED_SYMBOLS = [
     s.strip()
-    for s in os.getenv(
-        "PORTFOLIO_SYMBOLS", "BTCUSDT,ETHUSDT,XAUUSD,EURUSD"
-    ).split(",")
+    for s in os.getenv("PORTFOLIO_SYMBOLS", "BTCUSDT,ETHUSDT,XAUUSD,EURUSD").split(",")
 ]
 
 # Minimum allocation weight per symbol (0–1).  Remaining capital is split

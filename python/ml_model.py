@@ -82,6 +82,7 @@ class XGBoostModel:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _extract_features(features: dict) -> list:
     return [
         float(features.get("rsi", 50)),
