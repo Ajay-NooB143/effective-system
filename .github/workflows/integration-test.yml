@@ -97,8 +97,12 @@ jobs:
     - name: Start Bot (background)
       run: |
         cd bot
-        # Create .env file for testing
-        cat > .env << EOF
+        # Create .env file for testing with all required variables
+        cat > .env << 'EOF'
+        BINANCE_API_KEY=test_api_key
+        BINANCE_SECRET=test_secret_key
+        TELEGRAM_TOKEN=test_telegram_token
+        CHAT_ID=test_chat_id
         MODE=SAFE
         PORT=5000
         WEBHOOK_SECRET=test_secret
@@ -133,13 +137,13 @@ jobs:
         max_attempts=10
         attempt=0
         while [ $attempt -lt $max_attempts ]; do
-          # Use a more complete payload matching the bot's expected schema
+          # Use || true to prevent bash -e from exiting on connection failure
           response=$(curl http://localhost:5000/webhook \
             -X POST \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Secret: test_secret" \
             -d '{"symbol":"BTCUSDT","price":50000}' \
-            -w "\n%{http_code}" -s)
+            -w "\n%{http_code}" -s 2>/dev/null) || true
           
           http_code=$(echo "$response" | tail -n1)
           
