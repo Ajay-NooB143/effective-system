@@ -18,8 +18,8 @@ def place_order(symbol, side, qty):
         send_telegram(f"🟡 SIM {side} {symbol} qty={qty}")
     else:
         try:
-            client = _get_client()
-            order = client.create_order(
+            binance_client = _get_client()
+            order = binance_client.create_order(
                 symbol=symbol, side=side, type="MARKET", quantity=qty
             )
             send_telegram(f"✅ LIVE ORDER PLACED\n{side} {symbol}\nQty: {qty}")

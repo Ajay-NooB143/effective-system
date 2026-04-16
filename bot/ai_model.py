@@ -33,8 +33,8 @@ Example:
 BUY
 0.82
 """
-        client_ai = _get_client()
-        response = client_ai.chat.completions.create(
+        openai_client = _get_client()
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=20,
