@@ -4,6 +4,7 @@ from openai import OpenAI
 
 client_ai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+
 def ai_predict(features):
     """
     Uses GPT-4 to predict BUY/SELL/HOLD.
@@ -26,7 +27,7 @@ BUY
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=20,
-            temperature=0.3
+            temperature=0.3,
         )
         text = response.choices[0].message.content.strip().split("\n")
         signal = text[0].strip().upper()
