@@ -5,6 +5,32 @@
   font-family: sans-serif;
 }
 
+.conva-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.conva-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, #a855f7, #6366f1, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.conva-tagline {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin: 0;
+}
+
 .binance-balance {
   background: #1a1a2e;
   border-radius: 8px;
