@@ -22,6 +22,9 @@ schedule>=1.2.0
 # Binance live execution
 python-binance>=1.0.19
 
+# ZMQ bridge (used when TRADING_MODE=zmq)
+pyzmq>=25.0.0
+
 # Environment variable loading
 python-dotenv>=1.0.0
 

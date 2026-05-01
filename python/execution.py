@@ -1,16 +1,27 @@
-"""Order execution — safe simulation mode and live Binance mode.
+"""Order execution — simulation, live Binance, or ZMQ bridge modes.
 
-Set the environment variable ``TRADING_MODE=live`` to switch from
-simulation to real Binance orders.  All other values (or absence of
-the variable) keep the system in safe simulation mode.
+Set the environment variable ``TRADING_MODE`` to choose the execution path:
+
+* ``sim`` (default) — paper-trades; no real orders placed.
+* ``live``          — places real market orders directly via python-binance.
+* ``zmq``           — forwards orders to the C++ execution engine through the
+                      ZMQ PUSH bridge (see ``execution/bridge.py``).
+                      The C++ engine handles signing and Binance REST calls.
 """
 
 import os
+import sys
 from typing import Dict
 
 from telegram_bot import send_message
 
 TRADING_MODE = os.getenv("TRADING_MODE", "sim").lower()
+
+# Add repo root to sys.path so ``execution.bridge`` is importable when
+# running from the ``python/`` directory.
+_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
 
 try:
     from binance.client import Client as BinanceClient  # type: ignore
@@ -64,6 +75,8 @@ def execute_multi(allocations: Dict[str, float], prices: Dict[str, float]) -> li
 
         if TRADING_MODE == "live":
             result = _execute_live(symbol, side, quantity)
+        elif TRADING_MODE == "zmq":
+            result = _execute_zmq(symbol, side, quantity)
         else:
             result = _execute_sim(symbol, side, quantity, price)
 
@@ -117,8 +130,35 @@ def _execute_live(symbol: str, side: str, quantity: float) -> dict:
         }
 
 
+def _execute_zmq(symbol: str, side: str, quantity: float) -> dict:
+    """Forward the order to the C++ execution engine via ZMQ PUSH bridge."""
+    try:
+        from execution.bridge import send_order  # type: ignore[import]
+
+        send_order(symbol, side, round(quantity, 6))
+        return {
+            "mode": "zmq",
+            "symbol": symbol,
+            "side": side,
+            "quantity": round(quantity, 6),
+            "status": "SENT",
+        }
+    except Exception as exc:
+        return {
+            "mode": "zmq",
+            "symbol": symbol,
+            "side": side,
+            "quantity": round(quantity, 6),
+            "status": "ERROR",
+            "error": str(exc),
+        }
+
+
 def _notify(result: dict) -> None:
-    mode_tag = "🟡 SIM" if result["mode"] == "sim" else "🟢 LIVE"
+    mode = result["mode"]
+    mode_tag = {"sim": "🟡 SIM", "live": "🟢 LIVE", "zmq": "🔵 ZMQ"}.get(
+        mode, mode.upper()
+    )
     status = result.get("status", "?")
     symbol = result.get("symbol", "?")
     side = result.get("side", "?")
