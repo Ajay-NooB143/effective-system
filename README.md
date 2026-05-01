@@ -136,6 +136,68 @@ Retrains all models immediately and then every `RETRAIN_INTERVAL_DAYS` days.
 
 ---
 
+## C++ Execution Engine (ZMQ Bridge)
+
+The C++ engine receives order messages from the Python pipeline via a ZMQ
+PUSH/PULL socket and places them on Binance using HTTPS REST + HMAC-SHA256
+signing.
+
+### Prerequisites
+```bash
+# Debian / Ubuntu
+sudo apt install build-essential cmake pkg-config libzmq3-dev libcurl4-openssl-dev libssl-dev git
+```
+
+### Build
+```bash
+cd execution
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+The binary is created at `execution/build/execution_engine`.
+
+### Run
+```bash
+# Paper mode (no credentials required)
+DRY_RUN=true ./build/execution_engine
+
+# Binance Testnet
+BINANCE_API_KEY=your_key BINANCE_API_SECRET=your_secret \
+  BINANCE_TESTNET=true ./build/execution_engine
+
+# Live trading (use with caution)
+BINANCE_API_KEY=your_key BINANCE_API_SECRET=your_secret \
+  ./build/execution_engine
+```
+
+### Start the Python pipeline in ZMQ mode
+```bash
+cd python
+TRADING_MODE=zmq python app.py
+```
+The Flask webhook will now forward every executed order to the C++ engine via
+`tcp://localhost:5555` instead of calling the Binance REST API directly.
+
+### Environment variables
+
+**C++ execution engine** (`execution/execution_engine`):
+
+| Variable | Default | Description |
+|---|---|---|
+| `BINANCE_API_KEY` | — | Binance API key |
+| `BINANCE_API_SECRET` | — | Binance API secret (never logged) |
+| `BINANCE_TESTNET` | `false` | `true` → use `testnet.binance.vision` |
+| `DRY_RUN` | `false` | `true` → log orders without placing them |
+| `ZMQ_BIND` | `tcp://*:5555` | ZMQ PULL bind address |
+
+**Python bridge** (`execution/bridge.py`):
+
+| Variable | Default | Description |
+|---|---|---|
+| `ZMQ_ENDPOINT` | `tcp://localhost:5555` | ZMQ PUSH connect address (must match `ZMQ_BIND`) |
+
+---
+
 ## Binance Integration
 
 ### Setup
