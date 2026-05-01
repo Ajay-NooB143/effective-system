@@ -55,6 +55,9 @@
 
 using json = nlohmann::json;
 
+// Maximum backoff delay in seconds for consecutive execution errors
+static constexpr int MAX_BACKOFF_SECONDS = 64;
+
 // ---------------------------------------------------------------------------
 // Graceful shutdown
 // ---------------------------------------------------------------------------
@@ -90,7 +93,8 @@ static std::string hmac_sha256_hex(const std::string &key,
                                    const std::string &data) {
     unsigned char digest[EVP_MAX_MD_SIZE] = {};
     unsigned int digest_len = 0;
-    HMAC(EVP_sha256(), key.data(), static_cast<int>(key.size()),
+    // key.size() is safely bounded for HMAC keys (validated at startup)
+    HMAC(EVP_sha256(), key.data(), static_cast<int>(key.size() & 0x7fffffff),
          reinterpret_cast<const unsigned char *>(data.data()), data.size(),
          digest, &digest_len);
 
@@ -184,10 +188,12 @@ class BinanceClient {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
 
         const CURLcode rc = curl_easy_perform(curl);
-        if (rc != CURLE_OK)
-            response = std::string(R"({"error":"curl: ")") +
-                       curl_easy_strerror(rc) + "\"}";
-
+        if (rc != CURLE_OK) {
+            // Use nlohmann/json to ensure the error message is properly escaped
+            response = json{{"error", std::string("curl: ") +
+                                          curl_easy_strerror(rc)}}
+                           .dump();
+        }
         curl_slist_free_all(hdrs);
         curl_easy_cleanup(curl);
         return response;
@@ -336,10 +342,10 @@ int main() {
             continue;
         }
 
-        // Exponential backoff on repeated failures (cap at 64 s)
+        // Exponential backoff on repeated failures
         if (consecutive_errors > 0) {
             const int delay_s =
-                std::min(1 << std::min(consecutive_errors, 6), 64);
+                std::min(1 << std::min(consecutive_errors, 6), MAX_BACKOFF_SECONDS);
             std::cerr << "[engine] backing off " << delay_s << "s after "
                       << consecutive_errors << " consecutive error(s)\n";
             std::this_thread::sleep_for(std::chrono::seconds(delay_s));

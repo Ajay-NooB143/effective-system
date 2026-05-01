@@ -178,7 +178,9 @@ TRADING_MODE=zmq python app.py
 The Flask webhook will now forward every executed order to the C++ engine via
 `tcp://localhost:5555` instead of calling the Binance REST API directly.
 
-### Environment variables (execution engine)
+### Environment variables
+
+**C++ execution engine** (`execution/execution_engine`):
 
 | Variable | Default | Description |
 |---|---|---|
@@ -187,7 +189,12 @@ The Flask webhook will now forward every executed order to the C++ engine via
 | `BINANCE_TESTNET` | `false` | `true` → use `testnet.binance.vision` |
 | `DRY_RUN` | `false` | `true` → log orders without placing them |
 | `ZMQ_BIND` | `tcp://*:5555` | ZMQ PULL bind address |
-| `ZMQ_ENDPOINT` | `tcp://localhost:5555` | Python bridge connect address |
+
+**Python bridge** (`execution/bridge.py`):
+
+| Variable | Default | Description |
+|---|---|---|
+| `ZMQ_ENDPOINT` | `tcp://localhost:5555` | ZMQ PUSH connect address (must match `ZMQ_BIND`) |
 
 ---
 

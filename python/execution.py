@@ -17,12 +17,6 @@ from telegram_bot import send_message
 
 TRADING_MODE = os.getenv("TRADING_MODE", "sim").lower()
 
-# Add repo root to sys.path so ``execution.bridge`` is importable when
-# running from the ``python/`` directory.
-_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _repo_root not in sys.path:
-    sys.path.insert(0, _repo_root)
-
 try:
     from binance.client import Client as BinanceClient  # type: ignore
     BINANCE_AVAILABLE = True
@@ -133,6 +127,12 @@ def _execute_live(symbol: str, side: str, quantity: float) -> dict:
 def _execute_zmq(symbol: str, side: str, quantity: float) -> dict:
     """Forward the order to the C++ execution engine via ZMQ PUSH bridge."""
     try:
+        # Ensure repo root is on sys.path so execution.bridge is importable
+        # when this module is run from the python/ subdirectory.
+        _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if _repo_root not in sys.path:
+            sys.path.insert(0, _repo_root)
+
         from execution.bridge import send_order  # type: ignore[import]
 
         send_order(symbol, side, round(quantity, 6))

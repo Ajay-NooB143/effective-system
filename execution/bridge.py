@@ -72,7 +72,7 @@ def send_order(
     msg = {
         "symbol": symbol,
         "side": side,
-        "qty": round(qty, 8),
+        "qty": round(qty, 6),
         "type": order_type,
         "timeInForce": time_in_force,
     }
