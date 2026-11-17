@@ -1,55 +1,46 @@
-from flask import Flask, request, abort
+"""Authenticated signal-only webhook."""
+import hmac
+from flask import Flask, request, abort, jsonify
 from ai_model import ai_predict
 from telegram_bot import send_telegram
-from execution import place_order
-from config import WEBHOOK_SECRET, ORDER_QTY
+from config import WEBHOOK_SECRET
 
 app = Flask(__name__)
 
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    # Validate shared secret if configured
-    if WEBHOOK_SECRET:
-        token = request.headers.get("X-Webhook-Secret", "")
-        if token != WEBHOOK_SECRET:
-            abort(403)
+    if not WEBHOOK_SECRET:
+        abort(503, description="Webhook authentication is not configured")
+    token = request.headers.get("X-Webhook-Secret", "")
+    if not hmac.compare_digest(token, str(WEBHOOK_SECRET)):
+        abort(403)
 
-    data = request.json
-    if not data:
-        abort(400, description="Invalid or missing JSON payload.")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        abort(400, description="Invalid or missing JSON payload")
 
-    symbol = data.get("symbol", "BTCUSDT")
+    symbol = str(data.get("symbol", "")).strip().upper()
     try:
         price = float(data.get("price", 0))
     except (TypeError, ValueError):
-        abort(400, description="Invalid 'price' value — must be a number.")
+        abort(400, description="Invalid price")
+    if not symbol or price <= 0:
+        abort(400, description="symbol and positive price are required")
 
-    if price <= 0:
-        abort(400, description="Invalid 'price' value — must be greater than zero.")
-
-    features = [price]
-
-    signal, confidence = ai_predict(features)
-
-    if signal != "HOLD":
-        place_order(symbol, signal, ORDER_QTY)
-
-        send_telegram(f"""
-💀 SIGNAL: {signal}
-📊 Symbol: {symbol}
-💰 Price: {price}
-🧠 Confidence: {round(confidence * 100, 2)}%
-""")
-    else:
-        send_telegram(f"""
-🟡 HOLD — No trade
-📊 Symbol: {symbol}
-💰 Price: {price}
-🧠 Confidence: {round(confidence * 100, 2)}%
-""")
-
-    return "OK", 200
+    signal, confidence = ai_predict([price])
+    label = signal if signal in ("BUY", "SELL", "HOLD") else "HOLD"
+    send_telegram(
+        f"📡 SIGNAL ONLY: {label}\nSymbol: {symbol}\nPrice: {price}\n"
+        f"Confidence: {round(float(confidence) * 100, 2)}%\nExecution: DISABLED"
+    )
+    return jsonify({
+        "status": "signal_only",
+        "symbol": symbol,
+        "signal": label,
+        "confidence": float(confidence),
+        "execution": "disabled",
+    }), 200
 
 
 if __name__ == "__main__":
